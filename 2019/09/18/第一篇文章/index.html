@@ -14,7 +14,7 @@
   <meta name="description" content>
   <meta name="author" content="gw">
   <meta name="keywords" content>
-  <title>[test] ~ 负重前行</title>
+  <title>require.context前端工程自动化（Vue） ~ 负重前行</title>
   <link rel="stylesheet" href="/lib/font-awesome/css/all.min.css?v=5.7.2">
   <link rel="stylesheet" href="/lib/mdbootstrap/css/bootstrap.min.css?v=4.3.1">
   <link rel="stylesheet" href="/lib/mdbootstrap/css/mdb.min.css?v=4.8.7">
@@ -89,7 +89,7 @@
                     </span>
             
               <br>
-              <p>星期二, 九月 17日 2019, 3:38 下午</p>
+              <p>星期三, 九月 18日 2019, 11:41 中午</p>
             
           </div>
         </div>
@@ -108,14 +108,85 @@
       <div class="py-5 z-depth-3 board">
         <div class="post-content mx-auto">
           <div class="markdown-body">
-            
+            <p> 使用require.context加快项目的开发速度，实现自动化导入模块，避免每个文件都要import进行导入的烦恼</p>
+<a id="more"></a>
+
+<h1 id="什么是require-context"><a href="#什么是require-context" class="headerlink" title="什么是require.context"></a>什么是require.context</h1><ul>
+<li><p>require.context可以根据正则表达式来对一个目录进行搜索，并且可以配置是否搜索该目录的子目录。</p>
+<blockquote>
+<p>语法：(来自官网)<br> <code>require.context(directory, useSubdirectories = true, regExp = /^\.\/.*$/, mode = &#39;sync&#39;);</code></p>
+</blockquote>
+<h1 id="require-context可以做什么"><a href="#require-context可以做什么" class="headerlink" title="require.context可以做什么"></a>require.context可以做什么</h1></li>
+<li><p>全局组件的注册</p>
+</li>
+<li><p>全局图片的引入</p>
+</li>
+<li><p>……</p>
+<h1 id="使用require-context"><a href="#使用require-context" class="headerlink" title="使用require.context"></a>使用require.context</h1><blockquote>
+<p>require.context接受三个参数<br> 1 directory：代表文件路径<br> 2 useSubdirectories： 是否遍历子目录（Boolean）<br> 3 regExp: 正则表达式</p>
+</blockquote>
+<blockquote>
+<p>require.context的执行结果返回一个函数，这个函数有三个属性</p>
+<ul>
+<li>resolve(Function):接受一个文件的相对路径，返回这个文件相对整个项目的相对路径。</li>
+<li>keys(Function):返回匹配到的模块的数组。</li>
+<li>id(String):返回require.context的信息</li>
+</ul>
+</blockquote>
+<p> 如图：</p>
+<blockquote>
+<p><img src="https://s2.ax1x.com/2019/09/19/nLGdSA.png" alt="avatar"><br><img src="https://s2.ax1x.com/2019/09/19/nLGOp9.png" alt="avatar"><br>得到的结果为：<br><img src="https://s2.ax1x.com/2019/09/19/nLJ49H.png" alt="avatar"></p>
+</blockquote>
+<p>  如图所示：requireComponents.keys()得到的是文件的相对路径<br>  但是这样的文件路径是没法直接用的，因为咱们项目利用到的地方都是需要按模块导入的，requireComponents的返回值也是一个函数，档把requireComponents.keys()中的值传入，可以得到如此结果</p>
+<blockquote>
+<p><img src="https://s2.ax1x.com/2019/09/19/nLto0P.png" alt="avatar"><br>  由此可见，requireComponents函数的返回值可以返回一个模块，我们可以根据这个做很多文章，比如全局组件的注册，或者全局图片的引入，这样就避免了每个页面写一大堆import这种蛋疼的代码。<br>全局组件的引入</p>
+<pre><code>  requireComponents.keys().forEach(fileName =&gt; {
+      // 组件实例
+      const reqCom = requireComponents(fileName)
+      // 截取路径作为组件名
+      let reqComName = fileName.split(&#39;.vue&#39;)[0].split(&#39;/&#39;)
+      reqComName = reqComName[reqComName.length-1]
+      // 组件挂载
+      Vue.component(reqComName, reqCom.default || reqCom)
+  })</code></pre><p>然后得到以Base命名切在components文件夹下的文件，都是全局组件<br>全局图片的使用<br>  单独js文件中</p>
+<pre><code>      let globalImg={};
+          // 全局引入图片
+          const requireAllImg = require.context(
+          &#39;../assets/img&#39;,
+          true,
+          /[\d\D]/
+          )
+          requireAllImg.keys().forEach(v =&gt; {
+              const arr = requireAllImg(v).split(&#39;/&#39;);
+              arr.reverse();
+              const name = arr[0].split(&#39;.&#39;)[0]
+              globalImg[name]=requireAllImg(v);
+          });
+      export default globalImg;
+      &lt;!-- globalImg是图片对象，然后再main.js中引入 --&gt;
+      import glogalImg from &#39;./utils/globalImg&#39;
+      Vue.prototype.glogalImg = glogalImg;</code></pre><p>至此，就完成了全局组件和全局图片的注册，大大提升了开发效率，关于require.context的更多妙用，请待后续。。。</p>
+</blockquote>
+</li>
+</ul>
+
             <hr>
           </div>
           <br>
           <div>
             
+              <p>
+                <i class="iconfont icon-inbox"></i>
+                
+                  <a class="hover-with-bg" href="/categories/javascript">javascript</a>
+                  &nbsp;
+                
+              </p>
+            
             <p>
               <i class="iconfont icon-tag"></i>
+              
+                <a class="hover-with-bg" href="/tags/webpack">webpack</a>
               
             </p>
             
@@ -211,7 +282,7 @@
     var typed = new Typed('#subtitle', {
       strings: [
         '  ',
-        "[test]&nbsp;",
+        "require.context前端工程自动化（Vue）&nbsp;",
       ],
       cursorChar: "_",
       typeSpeed: 70,
